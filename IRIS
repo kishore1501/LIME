@@ -57,6 +57,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 #Training the model(RandomForestClassifier)
 model = RandomForestClassifier(random_state=42)
 model.fit(X_train, Y_train)
+explainer = lime.lime_tabular.LimeTabularExplainer(X_train, feature_names=feature_names, class_names=iris.target_names)
 print(data.iloc[11])
 
 #Choosing an instance from the test set
@@ -64,22 +65,27 @@ instance_idx = 11
 instance = X_test[instance_idx]
 
 #Get the predicted probabilites for each class
-pred_probs = model.predict_proba(instance.reshape(1, -1))
+predicted_class = model.predict([instance])[0]
+probabilities = model.predict_proba([instance])[0]
 
-for class_idx, class_name in enumerate(class_names):
-    print(f"Predicted probability for {class_name} - {pred_probs[0][class_idx]}")
-
-explainer = lime.lime_tabular.LimeTabularExplainer(X_train, feature_names=feature_names, class_names=class_names)
-
-explanation = explainer.explain_instance(instance, model.predict_proba, num_features=len(feature_names))
-
-print("LIME EXPLANATION")
-for features, weight in explanation.as_list():
-    print(f"{features:<30}{weight:.4f}")
+print("\nModel Prediction: ")
+print(f"Predicted Class:{iris.target_names[predicted_class]}")
+print("Class Probabilities: ")
+for class_idx, class_name in enumerate(iris.target_names):
+    print(f"{class_name} - {probabilities[class_idx]:.4f}")
     
+df = pd.DataFrame(X, columns=feature_names)
+df['target']=Y
+df.hist(figsize=(10,6))
+plt.tight_layout()
+plt.show()
 
-fig = explanation.as_pyplot_figure()
-plt.title("LIME Explanation")
-plt.xlabel("Feature Importance")
+# Visualize the pairwise relationship between features using scatter plots
+sns.pairplot(df, hue='target')
+plt.show()
+
+corr = df.corr()
+sns.heatmap(corr, annot=True, cmap='coolwarm')
+plt.title('correlation matrix')
 plt.show()
 
