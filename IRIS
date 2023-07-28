@@ -1,7 +1,20 @@
+!pip install lime
+
+import os
+
+package_name = 'lime'
+package_path = os.path.dirname(os.path.realpath(__import__(package_name).__file__))
+package_size = os.path.getsize(package_path)//1024
+
+print(f"Size of {package_name}: {package_size} MB")
+# Size of the LIME is 4 MB
+
 import lime
 import lime.lime_tabular 
+
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
@@ -15,6 +28,17 @@ feature_names = iris.feature_names
 class_names = iris.target_names
 print("Feature names:", feature_names)
 print("Class names:", class_names)
+
+# Size of the dataset
+dataset_size = X.shape
+print("The size of the dataset is:", dataset_size)
+
+# Convert data to a DataFrame
+data = pd.DataFrame(X, columns=feature_names)
+data['target'] = Y
+
+print(data.head())
+print(data.tail())
 
 # Size of the dataset
 dataset_size = X.shape
