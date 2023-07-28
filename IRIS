@@ -1,0 +1,61 @@
+import lime
+import lime.lime_tabular 
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+iris = load_iris()
+X = iris.data
+Y = iris.target
+
+feature_names = iris.feature_names
+class_names = iris.target_names
+print("Feature names:", feature_names)
+print("Class names:", class_names)
+
+# Size of the dataset
+dataset_size = X.shape
+print("The size of the dataset is:", dataset_size)
+
+# Convert data to a DataFrame
+data = pd.DataFrame(X, columns=feature_names)
+data['target'] = Y
+
+print(data.head())
+print(data.tail())
+
+#Splitting the dataset into training and testing data
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+#Training the model(RandomForestClassifier)
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, Y_train)
+print(data.iloc[11])
+
+#Choosing an instance from the test set
+instance_idx = 11
+instance = X_test[instance_idx]
+
+#Get the predicted probabilites for each class
+pred_probs = model.predict_proba(instance.reshape(1, -1))
+
+for class_idx, class_name in enumerate(class_names):
+    print(f"Predicted probability for {class_name} - {pred_probs[0][class_idx]}")
+
+explainer = lime.lime_tabular.LimeTabularExplainer(X_train, feature_names=feature_names, class_names=class_names)
+
+explanation = explainer.explain_instance(instance, model.predict_proba, num_features=len(feature_names))
+
+print("LIME EXPLANATION")
+for features, weight in explanation.as_list():
+    print(f"{features:<30}{weight:.4f}")
+    
+
+fig = explanation.as_pyplot_figure()
+plt.title("LIME Explanation")
+plt.xlabel("Feature Importance")
+plt.show()
+
